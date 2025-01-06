@@ -16,7 +16,7 @@ for symbol in symbols:
     quote = client.get_quote(symbol)
 
     # History Data
-    history_df = client.get_time_series(symbol, outputsize=365)
+    history_df = client.get_time_series(symbol, interval='1day', outputsize=5000)
     print(f"Stored symbol: {symbol}")
     print(history_df)
 

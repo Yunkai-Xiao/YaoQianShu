@@ -17,7 +17,7 @@ class TwelveDataClient:
             raise Exception(f"Error: {data['message']}")
         return data
 
-    def get_time_series(self, symbol, interval='1day', outputsize=30, **kwargs):
+    def get_time_series(self, symbol, interval='1min', outputsize=30, **kwargs):
         params = {
             'symbol': symbol,
             'interval': interval,

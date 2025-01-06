@@ -37,7 +37,40 @@ class StockDataMongoDB:
         # Insert the data into MongoDB
         result = self.collection.insert_many(stock_data)
         print(f"Inserted {len(result.inserted_ids)} documents into MongoDB.")
-    
+
+    def get_stock_data(self, symbol):
+        """
+        Fetch all stock data for a given symbol from MongoDB.
+        :param symbol: Stock symbol to fetch data for.
+        :return: A pandas DataFrame containing the stock data.
+        """
+        # Query the collection for documents with the given symbol
+        cursor = self.collection.find({"symbol": symbol})
+        
+        # Convert the cursor to a list of documents
+        documents = list(cursor)
+        
+        # If documents are found, convert them to a DataFrame
+        if documents:
+            # Remove the '_id' field if not needed
+            for doc in documents:
+                doc.pop('_id', None)
+            df = pd.DataFrame(documents)
+            # Convert data types if necessary
+            df['datetime'] = pd.to_datetime(df['datetime'])
+            numeric_fields = ['open', 'high', 'low', 'close', 'volume']
+            for field in numeric_fields:
+                df[field] = pd.to_numeric(df[field], errors='coerce')
+                
+            df.drop_duplicates(subset='datetime', keep='first', inplace=True)
+            # Sort by datetime
+            df.sort_values('datetime', inplace=True)
+            print(f"Fetched {len(df)} records for symbol '{symbol}'.")
+            return df
+        else:
+            print(f"No records found for symbol '{symbol}'.")
+            return pd.DataFrame()  # Return empty DataFrame if no records found
+
     def close_connection(self):
         """ Close MongoDB connection. """
         self.client.close()
