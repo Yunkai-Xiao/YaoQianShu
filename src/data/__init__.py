@@ -1,11 +1,6 @@
-# =======================  File: init.py  ========================
-
-"""Public re‑exports for yaoqianshu.data package."""
+"""Data access layer and ingestion helpers."""
 from .datastore import DataStore, DataPortal
 from .ingest import download_history
+from .series import DataSeries
 
-all = [
-    "DataStore",
-    "DataPortal",
-    "download_history",
-]
+__all__ = ["DataStore", "DataPortal", "DataSeries", "download_history"]
