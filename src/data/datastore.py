@@ -1,13 +1,15 @@
 """Datastore & DataPortal – core read‑only access layer."""
+
 from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Tuple
+from typing import Callable, Dict, Iterable, List, Optional, Tuple
 
 import pandas as pd
 
+from .series import DataSeries
 logger = logging.getLogger(__name__)
 
 ###############################################################################
@@ -16,10 +18,11 @@ logger = logging.getLogger(__name__)
 
 ###############################################################################
 
+
 class DataStore:
     """
     Simple file‑system backed OHLCV store.
-    
+
     Notes
     -----
     * Stores one file per *symbol* (``<SYMBOL>.parquet`` or ``.csv``).
@@ -78,15 +81,34 @@ class DataStore:
 
 ###############################################################################
 
+
 @dataclass
 class DataPortal:
     datastore: DataStore
     symbols: List[str]
     _index: pd.DatetimeIndex = field(init=False, repr=False)
+    _series: Dict[str, DataSeries] = field(init=False, repr=False)
 
     def __post_init__(self):
-        self._index = self.datastore.load(self.symbols[0]).index  # assume superset
+        self._series = {
+            sym: DataSeries(self.datastore.load(sym)) for sym in self.symbols
+        }
+        self._index = self._series[self.symbols[0]].data.index
         logger.debug("DataPortal created with %d bars", len(self._index))
+
+    # ------------------------------------------------------------------
+    def register_indicator(
+        self,
+        name: str,
+        func: Callable[[pd.DataFrame], pd.Series | pd.DataFrame],
+        symbols: Optional[List[str]] = None,
+    ) -> None:
+        for sym in symbols or self.symbols:
+            self._series[sym].register_indicator(name, func)
+
+    def unregister_indicator(self, name: str, symbols: Optional[List[str]] = None) -> None:
+        for sym in symbols or self.symbols:
+            self._series[sym].unregister_indicator(name)
 
     # --------------------------------------------------------------------
     def iter_bars(
@@ -95,12 +117,23 @@ class DataPortal:
         start: Optional[pd.Timestamp] = None,
         end: Optional[pd.Timestamp] = None,
     ) -> Iterable[Tuple[pd.Timestamp, Dict[str, pd.Series]]]:
+        enhanced = {sym: ds.enhance() for sym, ds in self._series.items()}
         for ts in self._index:
             if start and ts < start:
                 continue
             if end and ts > end:
                 break
-            yield ts, {sym: self.datastore.load(sym).loc[ts] for sym in self.symbols}
+            yield ts, {sym: self._select_row(enhanced[sym], ts, sym) for sym in self.symbols}
 
     def get_bar(self, ts: pd.Timestamp, symbol: str):
-        return self.datastore.load(symbol).loc[ts]
+        return self._select_row(self._series[symbol].enhance(), ts, symbol)
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _select_row(df: pd.DataFrame, ts: pd.Timestamp, symbol: str) -> pd.Series:
+        row = df.loc[ts]
+        if isinstance(row.index, pd.MultiIndex):
+            for level in range(row.index.nlevels):
+                if symbol in row.index.get_level_values(level):
+                    return row.xs(symbol, level=level)
+        return row
