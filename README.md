@@ -14,7 +14,7 @@ sample data.
 ## Install dependencies
 
 ```bash
-pip install pandas pyarrow
+pip install pandas pyarrow yfinance
 ```
 
 ## Example strategy
@@ -67,3 +67,27 @@ print(report)
 
 Running the above code will print the portfolio value over time and a summary
 statistics report.
+
+## Fetch real data
+
+You can download historical prices from Yahoo Finance using the bundled script:
+
+```bash
+PYTHONPATH=. python src/scripts/fetch_data.py --root market_data --symbols SPY --start 2020-01-01 --end 2020-02-01
+```
+
+This creates `market_data/SPY.parquet` (and a CSV fallback) which the example
+backtest will consume.
+
+## Run the moving average example
+
+With data in place, execute the built-in moving average crossover strategy. You
+can run the script directly or inspect `examples/simple_backtest.py` for a
+minimal programmatic example:
+
+```bash
+PYTHONPATH=. python src/scripts/run_backtest.py --root market_data --symbol SPY --short 5 --long 20 --cash 10000
+```
+
+The script prints a `Report` object summarizing total return, annual return,
+Sharpe ratio and maximum drawdown.
