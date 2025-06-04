@@ -1,4 +1,5 @@
 """Datastore & DataPortal – core read‑only access layer."""
+
 from __future__ import annotations
 
 import logging
@@ -16,10 +17,11 @@ logger = logging.getLogger(__name__)
 
 ###############################################################################
 
+
 class DataStore:
     """
     Simple file‑system backed OHLCV store.
-    
+
     Notes
     -----
     * Stores one file per *symbol* (``<SYMBOL>.parquet`` or ``.csv``).
@@ -78,6 +80,7 @@ class DataStore:
 
 ###############################################################################
 
+
 @dataclass
 class DataPortal:
     datastore: DataStore
@@ -100,7 +103,20 @@ class DataPortal:
                 continue
             if end and ts > end:
                 break
-            yield ts, {sym: self.datastore.load(sym).loc[ts] for sym in self.symbols}
+            yield ts, {
+                sym: self._select_row(self.datastore.load(sym), ts, sym)
+                for sym in self.symbols
+            }
 
     def get_bar(self, ts: pd.Timestamp, symbol: str):
-        return self.datastore.load(symbol).loc[ts]
+        return self._select_row(self.datastore.load(symbol), ts, symbol)
+
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _select_row(df: pd.DataFrame, ts: pd.Timestamp, symbol: str) -> pd.Series:
+        row = df.loc[ts]
+        if isinstance(row.index, pd.MultiIndex):
+            for level in range(row.index.nlevels):
+                if symbol in row.index.get_level_values(level):
+                    return row.xs(symbol, level=level)
+        return row
