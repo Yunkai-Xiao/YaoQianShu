@@ -31,6 +31,5 @@ def main() -> None:
     report = analyze(results)
     print(report)
 
-
 if __name__ == "__main__":
     main()

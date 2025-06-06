@@ -34,10 +34,10 @@ class MovingAverageCrossStrategy(Strategy):
         long_ma = pd.Series(self.prices[-self.long_window:]).mean()
 
         if short_ma > long_ma and not self.in_position:
-            engine.buy(self.symbol, 1)
+            engine.buy(self.symbol, 30)
             self.in_position = True
         elif short_ma < long_ma and self.in_position:
-            engine.sell(self.symbol, 1)
+            engine.sell(self.symbol, 30)
             self.in_position = False
 
 

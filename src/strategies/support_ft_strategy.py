@@ -4,6 +4,8 @@ from typing import Dict
 import pandas as pd
 import numpy as np
 
+from src.engine import Engine
+
 from ..strategy import Strategy
 
 
@@ -77,13 +79,14 @@ class SupportFTStrategy(Strategy):
         if self.trade_pct is not None:
             portfolio_val = engine.portfolio.value(engine._current_bar)
             qty = int((portfolio_val * self.trade_pct) / price)
+            print(max(qty, 1))
             return max(qty, 1)
         return self.trade_qty
 
     # ------------------------------------------------------------------
     def on_bar(
         self,
-        engine: "Engine",
+        engine: Engine,
         timestamp: pd.Timestamp,
         data: Dict[str, pd.Series],
     ) -> None:

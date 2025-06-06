@@ -26,7 +26,7 @@ app = FastAPI(title="Backtest API")
 # ---------------------------------------------------------------------------
 # Data store and portal management
 # ---------------------------------------------------------------------------
-DATA_ROOT = Path("market_data")
+DATA_ROOT = Path("src/market_data")
 store = DataStore(DATA_ROOT)
 
 # Cache DataPortal instances per symbol to preserve registered indicators

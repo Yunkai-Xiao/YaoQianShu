@@ -9,11 +9,11 @@ from src.strategies import SupportFTStrategy
 
 def main() -> None:
     store = DataStore(Path("market_data"))
-    portal = DataPortal(store, ["SPY"])
+    portal = DataPortal(store, ["NVDA"])
     # trade 5%% of portfolio each trade
-    strategy = SupportFTStrategy("SPY", trade_pct=0.05)
-    engine = Engine(portal, strategy, starting_cash=10_000.0)
-    results = engine.run(start=pd.Timestamp("2015-01-01"), end=pd.Timestamp("2016-01-01"))
+    strategy = SupportFTStrategy("NVDA", trade_pct=0.5)
+    engine = Engine(portal, strategy, starting_cash=10_000_000.0)
+    results = engine.run(start=pd.Timestamp("2000-01-01"), end=pd.Timestamp("2016-01-01"))
     report = analyze(results)
     print(report)
 
