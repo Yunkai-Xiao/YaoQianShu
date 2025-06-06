@@ -40,7 +40,6 @@ class KDJStrategy(Strategy):
         j = row.get("J")
         if k is None or d is None or j is None:
             return
-
         close = row["Close"]
         sma = self.history["Close"].rolling(self.sma_window).mean().iloc[-1]
 
