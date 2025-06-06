@@ -12,9 +12,11 @@ from . import (
     DataPortal,
     Engine,
     analyze,
-    MovingAverageCrossStrategy,
-    MACDStrategy,
 )
+from .strategy import Strategy
+import importlib
+import inspect
+import pkgutil
 from .indicators import sma, ema, macd, volume
 
 
@@ -37,10 +39,22 @@ _INDICATORS: Dict[str, Callable[..., Any]] = {
     "volume": volume,
 }
 
-_STRATEGIES: Dict[str, Callable[..., Any]] = {
-    "moving_average": MovingAverageCrossStrategy,
-    "macd": MACDStrategy,
-}
+_STRATEGIES: Dict[str, Callable[..., Any]] = {}
+
+
+def refresh_strategies() -> None:
+    """Load available strategy classes from ``src.strategies``."""
+    global _STRATEGIES
+    _STRATEGIES = {}
+    pkg = importlib.import_module(".strategies", __package__)
+    for _, mod_name, _ in pkgutil.iter_modules(pkg.__path__):
+        mod = importlib.import_module(f".strategies.{mod_name}", __package__)
+        for name, obj in inspect.getmembers(mod, inspect.isclass):
+            if issubclass(obj, Strategy) and obj is not Strategy:
+                _STRATEGIES[obj.__name__] = obj
+
+# Populate on start
+refresh_strategies()
 
 
 def _get_portal(symbol: str) -> DataPortal:
@@ -99,6 +113,7 @@ def add_indicator(req: IndicatorRequest):
 
 @app.post("/backtest")
 def run_backtest(req: BacktestRequest):
+    refresh_strategies()
     strat_cls = _STRATEGIES.get(req.strategy)
     if strat_cls is None:
         raise HTTPException(status_code=400, detail="Unknown strategy")
@@ -112,5 +127,12 @@ def run_backtest(req: BacktestRequest):
     return {
         "report": report.__dict__,
         "history": results.reset_index().to_dict("records"),
+        "trades": [t.__dict__ for t in engine.trades],
     }
+
+
+@app.get("/strategies")
+def list_strategies():
+    refresh_strategies()
+    return {"strategies": list(_STRATEGIES.keys())}
 
