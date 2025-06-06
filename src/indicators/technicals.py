@@ -51,4 +51,13 @@ def kdj(
     return pd.DataFrame({"K": k, "D": d, "J": j})
 
 
-__all__ = ["volume", "sma", "ema", "macd", "kdj"]
+def atr(df: pd.DataFrame, window: int = 14) -> pd.Series:
+    """Average True Range."""
+    high_low = df["High"] - df["Low"]
+    high_close = (df["High"] - df["Close"].shift()).abs()
+    low_close = (df["Low"] - df["Close"].shift()).abs()
+    tr = pd.concat([high_low, high_close, low_close], axis=1).max(axis=1)
+    return tr.rolling(window).mean()
+
+
+__all__ = ["volume", "sma", "ema", "macd", "kdj", "atr"]
