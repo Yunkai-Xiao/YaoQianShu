@@ -104,6 +104,9 @@ uvicorn src.server:app --reload
 Endpoints:
 
 - `GET /data/{symbol}` – return OHLCV data for a symbol.
+- `GET /symbols` – list available symbols on disk.
+- `POST /fetch` – download new data via Yahoo Finance and store it.
+- `GET /strategies` – discover available strategy classes.
 - `POST /indicator` – register an indicator for subsequent backtests. Example:
 
 ```json
@@ -121,3 +124,23 @@ Endpoints:
 ```
 
 The response contains the trade history along with a performance report.
+
+## Frontend UI
+
+A small React interface is included under `frontend/`. Install its dependencies and
+start the dev server:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+The React app communicates with the FastAPI service (running on
+`localhost:8000`) and provides two tabs:
+
+1. **Backtest** – select a symbol and strategy, run a backtest and view price
+   data, trade markers, portfolio equity and a small table of performance
+   metrics.
+2. **Fetch Data** – download new symbols via Yahoo Finance and add them to the
+   local datastore.
