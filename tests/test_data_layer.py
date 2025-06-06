@@ -89,6 +89,14 @@ def test_data_portal_get_bar(tmp_path: Path):
     series = portal.get_bar(dt, "ZZZ")
     assert pytest.approx(series["Close"], rel=1e-6) == 10.1
 
+
+def test_datastore_list_symbols(tmp_path: Path):
+    """list_symbols returns sorted symbol names from disk."""
+    _write_sample_csv(tmp_path, "CCC", [1, 2])
+    _write_sample_csv(tmp_path, "AAA", [1, 2])
+    store = DataStore(tmp_path)
+    assert store.list_symbols() == ["AAA", "CCC"]
+
 ###############################################################################
 # Clean‑up utility (optional) – ensure tmp dirs removed on Windows
 ###############################################################################

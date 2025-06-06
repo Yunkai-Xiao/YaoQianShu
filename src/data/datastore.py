@@ -74,6 +74,15 @@ class DataStore:
             self._cache.pop(oldest)
         self._cache[key] = df
 
+    # ------------------------------------------------------------------
+    def list_symbols(self) -> List[str]:
+        """Return all symbols with files in this DataStore."""
+        syms = []
+        for p in self.root.iterdir():
+            if p.suffix in {".parquet", ".csv"}:
+                syms.append(p.stem.upper())
+        return sorted(syms)
+
 
 ###############################################################################
 

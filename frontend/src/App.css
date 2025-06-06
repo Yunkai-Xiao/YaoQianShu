@@ -1,8 +1,20 @@
+
 #root {
   max-width: 1200px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tabs button {
+  margin-right: 0.5rem;
 }
 
 .controls {
@@ -12,7 +24,10 @@
   margin-bottom: 1rem;
 }
 
-.chart {
+.chart-container {
+  position: relative;
+  height: 400px;
+  width: 100%;
   margin-top: 1rem;
 }
 

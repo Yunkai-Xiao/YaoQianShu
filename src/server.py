@@ -12,6 +12,7 @@ from . import (
     DataPortal,
     Engine,
     analyze,
+    download_history,
 )
 from .strategy import Strategy
 import importlib
@@ -81,6 +82,12 @@ class BacktestRequest(BaseModel):
     cash: float = 1_000_000.0
 
 
+class FetchRequest(BaseModel):
+    symbol: str
+    start: Optional[str] = "2000-01-01"
+    end: Optional[str] = None
+
+
 # ---------------------------------------------------------------------------
 # API endpoints
 # ---------------------------------------------------------------------------
@@ -136,3 +143,14 @@ def list_strategies():
     refresh_strategies()
     return {"strategies": list(_STRATEGIES.keys())}
 
+@app.get("/symbols")
+def list_symbols():
+    symbols = store.list_symbols()
+    return {"symbols": symbols}
+
+
+@app.post("/fetch")
+def fetch_data(req: FetchRequest):
+    df = download_history(req.symbol, start=req.start, end=req.end, store=store)
+    _PORTALS.pop(req.symbol, None)
+    return {"rows": len(df)}

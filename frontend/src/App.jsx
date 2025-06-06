@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Line } from 'react-chartjs-2';
 import {
   Chart as ChartJS,
@@ -8,42 +8,64 @@ import {
   LineElement,
   TimeScale,
   Tooltip,
-  Legend
+  Legend,
 } from 'chart.js';
 import 'chartjs-adapter-date-fns';
 import './App.css';
 
-ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, TimeScale, Tooltip, Legend);
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+  TimeScale,
+  Tooltip,
+  Legend
+);
 
-function App() {
-  const [symbol, setSymbol] = useState('SPY');
+export default function App() {
+  const [tab, setTab] = useState('backtest');
+  const [symbols, setSymbols] = useState([]);
+  const [symbol, setSymbol] = useState('');
   const [strategies, setStrategies] = useState([]);
   const [strategy, setStrategy] = useState('');
   const [prices, setPrices] = useState([]);
   const [history, setHistory] = useState([]);
   const [trades, setTrades] = useState([]);
   const [report, setReport] = useState(null);
+  const [fetchSym, setFetchSym] = useState('');
+  const [fetchStart, setFetchStart] = useState('2000-01-01');
+  const [fetchEnd, setFetchEnd] = useState('');
 
+  // Load symbols and strategies on mount
   useEffect(() => {
+    fetch('/symbols')
+      .then((r) => r.json())
+      .then((d) => {
+        setSymbols(d.symbols);
+        if (d.symbols.length) setSymbol(d.symbols[0]);
+      });
     fetch('/strategies')
-      .then(r => r.json())
-      .then(d => {
+      .then((r) => r.json())
+      .then((d) => {
         setStrategies(d.strategies);
-        if (d.strategies.length > 0) setStrategy(d.strategies[0]);
+        if (d.strategies.length) setStrategy(d.strategies[0]);
       });
   }, []);
 
+  // Load price data whenever symbol changes
   useEffect(() => {
+    if (!symbol) return;
     fetch(`/data/${symbol}`)
-      .then(r => r.json())
-      .then(d => setPrices(d.data));
+      .then((r) => r.json())
+      .then((d) => setPrices(d.data));
   }, [symbol]);
 
   const runBacktest = async () => {
     const res = await fetch('/backtest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ symbol, strategy })
+      body: JSON.stringify({ symbol, strategy }),
     });
     const data = await res.json();
     setHistory(data.history);
@@ -51,24 +73,41 @@ function App() {
     setReport(data.report);
   };
 
+  const fetchData = async () => {
+    const res = await fetch('/fetch', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ symbol: fetchSym, start: fetchStart, end: fetchEnd }),
+    });
+    const data = await res.json();
+    alert(`Fetched ${data.rows} rows for ${fetchSym}`);
+    // reload symbol list
+    const syms = await fetch('/symbols').then((r) => r.json());
+    setSymbols(syms.symbols);
+  };
+
   const priceData = {
     datasets: [
       {
         label: 'Close',
-        data: prices.map(p => ({ x: p.timestamp, y: p.Close })),
+        data: prices.map((p) => ({ x: p.timestamp, y: p.Close })),
         borderColor: 'blue',
         fill: false,
       },
       {
         label: 'Buy',
-        data: trades.filter(t => t.side === 'buy').map(t => ({ x: t.timestamp, y: t.price })),
+        data: trades
+          .filter((t) => t.side === 'buy')
+          .map((t) => ({ x: t.timestamp, y: t.price })),
         type: 'scatter',
         pointBackgroundColor: 'green',
         showLine: false,
       },
       {
         label: 'Sell',
-        data: trades.filter(t => t.side === 'sell').map(t => ({ x: t.timestamp, y: t.price })),
+        data: trades
+          .filter((t) => t.side === 'sell')
+          .map((t) => ({ x: t.timestamp, y: t.price })),
         type: 'scatter',
         pointBackgroundColor: 'red',
         showLine: false,
@@ -80,36 +119,91 @@ function App() {
     datasets: [
       {
         label: 'Portfolio value',
-        data: history.map(h => ({ x: h.timestamp, y: h.value })),
+        data: history.map((h) => ({ x: h.timestamp, y: h.value })),
         borderColor: 'orange',
         fill: false,
       },
     ],
   };
 
+  const Analysis = () =>
+    report && (
+      <table className="report">
+        <tbody>
+          {Object.entries(report).map(([k, v]) => (
+            <tr key={k}>
+              <td>{k}</td>
+              <td>{v.toFixed ? v.toFixed(4) : v}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    );
+
   return (
     <div id="root">
-      <h1>Backtest UI</h1>
-      <div className="controls">
-        <input value={symbol} onChange={e => setSymbol(e.target.value)} />
-        <select value={strategy} onChange={e => setStrategy(e.target.value)}>
-          {strategies.map(s => (
-            <option key={s} value={s}>{s}</option>
-          ))}
-        </select>
-        <button onClick={runBacktest}>Run Backtest</button>
+      <div className="toolbar">
+        <h1>Backtest Dashboard</h1>
+        <div className="tabs">
+          <button onClick={() => setTab('backtest')}>Backtest</button>
+          <button onClick={() => setTab('fetch')}>Fetch Data</button>
+        </div>
       </div>
-      <div className="chart">
-        <Line data={priceData} options={{ scales: { x: { type: 'time' } } }} />
-      </div>
-      <div className="chart">
-        <Line data={pnlData} options={{ scales: { x: { type: 'time' } } }} />
-      </div>
-      {report && (
-        <pre className="report">{JSON.stringify(report, null, 2)}</pre>
+
+      {tab === 'backtest' && (
+        <div>
+          <div className="controls">
+            <select value={symbol} onChange={(e) => setSymbol(e.target.value)}>
+              {symbols.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <select value={strategy} onChange={(e) => setStrategy(e.target.value)}>
+              {strategies.map((s) => (
+                <option key={s} value={s}>
+                  {s}
+                </option>
+              ))}
+            </select>
+            <button onClick={runBacktest}>Run Backtest</button>
+          </div>
+
+          <div className="chart-container">
+            <Line
+              data={priceData}
+              options={{ scales: { x: { type: 'time' } }, responsive: true, maintainAspectRatio: false }}
+            />
+          </div>
+          <div className="chart-container">
+            <Line
+              data={pnlData}
+              options={{ scales: { x: { type: 'time' } }, responsive: true, maintainAspectRatio: false }}
+            />
+          </div>
+          <Analysis />
+        </div>
+      )}
+
+      {tab === 'fetch' && (
+        <div className="controls" style={{ flexDirection: 'column', alignItems: 'center' }}>
+          <div>
+            <input
+              placeholder="Symbol"
+              value={fetchSym}
+              onChange={(e) => setFetchSym(e.target.value.toUpperCase())}
+            />
+            <input
+              type="date"
+              value={fetchStart}
+              onChange={(e) => setFetchStart(e.target.value)}
+            />
+            <input type="date" value={fetchEnd} onChange={(e) => setFetchEnd(e.target.value)} />
+            <button onClick={fetchData}>Fetch</button>
+          </div>
+        </div>
       )}
     </div>
   );
 }
-
-export default App;
