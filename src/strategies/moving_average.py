@@ -10,7 +10,9 @@ from ..strategy import Strategy
 class MovingAverageCrossStrategy(Strategy):
     """Simple moving average crossover strategy for a single symbol."""
 
-    def __init__(self, symbol: str, short_window: int = 20, long_window: int = 50) -> None:
+    def __init__(
+        self, symbol: str, short_window: int = 20, long_window: int = 50
+    ) -> None:
         if short_window >= long_window:
             raise ValueError("short_window must be less than long_window")
         self.symbol = symbol
@@ -30,14 +32,14 @@ class MovingAverageCrossStrategy(Strategy):
         if len(self.prices) < self.long_window:
             return
 
-        short_ma = pd.Series(self.prices[-self.short_window:]).mean()
-        long_ma = pd.Series(self.prices[-self.long_window:]).mean()
+        short_ma = pd.Series(self.prices[-self.short_window :]).mean()
+        long_ma = pd.Series(self.prices[-self.long_window :]).mean()
 
         if short_ma > long_ma and not self.in_position:
-            engine.buy(self.symbol, 30)
+            engine.buy(self.symbol, 1)
             self.in_position = True
         elif short_ma < long_ma and self.in_position:
-            engine.sell(self.symbol, 30)
+            engine.sell(self.symbol, 1)
             self.in_position = False
 
 
