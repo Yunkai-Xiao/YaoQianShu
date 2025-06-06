@@ -121,3 +121,18 @@ Endpoints:
 ```
 
 The response contains the trade history along with a performance report.
+
+## Frontend UI
+
+A small React interface is included under `frontend/`. Install its dependencies and
+start the dev server:
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+It communicates with the FastAPI service (running on `localhost:8000`) and
+allows selecting strategies, running backtests and visualising price data,
+trades and the portfolio value over time.

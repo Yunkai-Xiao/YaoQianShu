@@ -20,6 +20,15 @@ class Portfolio:
         )
 
 
+@dataclass
+class Trade:
+    timestamp: pd.Timestamp
+    symbol: str
+    quantity: int
+    price: float
+    side: str
+
+
 class Engine:
     """Simple backtesting engine."""
 
@@ -37,6 +46,8 @@ class Engine:
             positions={sym: 0 for sym in data_portal.symbols},
         )
         self._current_bar: Optional[Dict[str, pd.Series]] = None
+        self._current_ts: Optional[pd.Timestamp] = None
+        self.trades: List[Trade] = []
 
     # ------------------------------------------------------------------
     def buy(self, symbol: str, quantity: int) -> None:
@@ -48,6 +59,15 @@ class Engine:
             raise ValueError("Insufficient cash")
         self.portfolio.cash -= cost
         self.portfolio.positions[symbol] += quantity
+        self.trades.append(
+            Trade(
+                timestamp=self._current_ts,
+                symbol=symbol,
+                quantity=quantity,
+                price=float(price),
+                side="buy",
+            )
+        )
 
     def sell(self, symbol: str, quantity: int) -> None:
         if self._current_bar is None:
@@ -57,6 +77,16 @@ class Engine:
         qty = min(quantity, owned)
         self.portfolio.positions[symbol] = owned - qty
         self.portfolio.cash += price * qty
+        if qty:
+            self.trades.append(
+                Trade(
+                    timestamp=self._current_ts,
+                    symbol=symbol,
+                    quantity=qty,
+                    price=float(price),
+                    side="sell",
+                )
+            )
 
     def run(
         self,
@@ -67,6 +97,7 @@ class Engine:
         history: List[Dict[str, float]] = []
         for ts, bar in self.data_portal.iter_bars(start=start, end=end):
             self._current_bar = bar
+            self._current_ts = ts
             self.strategy.on_bar(self, ts, bar)
             history.append(
                 {
@@ -76,5 +107,6 @@ class Engine:
                 }
             )
         self._current_bar = None
+        self._current_ts = None
         df = pd.DataFrame(history).set_index("timestamp")
         return df
