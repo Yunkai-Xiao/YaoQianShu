@@ -143,7 +143,6 @@ def list_strategies():
     refresh_strategies()
     return {"strategies": list(_STRATEGIES.keys())}
 
-
 @app.get("/symbols")
 def list_symbols():
     symbols = store.list_symbols()
@@ -155,4 +154,3 @@ def fetch_data(req: FetchRequest):
     df = download_history(req.symbol, start=req.start, end=req.end, store=store)
     _PORTALS.pop(req.symbol, None)
     return {"rows": len(df)}
-
