@@ -91,3 +91,33 @@ PYTHONPATH=. python src/scripts/run_backtest.py --root market_data --symbol SPY 
 
 The script prints a `Report` object summarizing total return, annual return,
 Sharpe ratio and maximum drawdown.
+
+## FastAPI server
+
+You can also interact with the backtester through a small REST API. Start the
+server with:
+
+```bash
+uvicorn src.server:app --reload
+```
+
+Endpoints:
+
+- `GET /data/{symbol}` – return OHLCV data for a symbol.
+- `POST /indicator` – register an indicator for subsequent backtests. Example:
+
+```json
+{"symbol": "SPY", "name": "sma", "params": {"window": 10}}
+```
+
+- `POST /backtest` – run a strategy and return the results. Example payload:
+
+```json
+{
+  "symbol": "SPY",
+  "strategy": "moving_average",
+  "params": {"short_window": 5, "long_window": 20}
+}
+```
+
+The response contains the trade history along with a performance report.
