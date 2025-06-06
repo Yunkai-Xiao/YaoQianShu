@@ -74,6 +74,7 @@ def main():
                 start=args.start,
                 end=args.end,
                 store=store,
+                interval="1h"
             )
             log.info("✔ %s (%d rows)", sym, len(df))
         except Exception as exc:

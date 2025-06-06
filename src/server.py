@@ -129,6 +129,9 @@ def run_backtest(req: BacktestRequest):
     if strat_cls is None:
         raise HTTPException(status_code=400, detail="Unknown strategy")
     portal = _get_portal(req.symbol)
+    portal.register_indicator("sma", sma)
+    portal.register_indicator("atr", atr)
+    portal.register_indicator("kdj", kdj)
     strategy = strat_cls(req.symbol, **(req.params or {}))
     engine = Engine(portal, strategy, starting_cash=req.cash)
     start_ts = pd.to_datetime(req.start) if req.start else None

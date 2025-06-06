@@ -51,7 +51,7 @@ def kdj(
     return pd.DataFrame({"K": k, "D": d, "J": j})
 
 
-def atr(df: pd.DataFrame, window: int = 14) -> pd.Series:
+def atr(df: pd.DataFrame, window: int = 9) -> pd.Series:
     """Average True Range."""
     high_low = df["High"] - df["Low"]
     high_close = (df["High"] - df["Close"].shift()).abs()

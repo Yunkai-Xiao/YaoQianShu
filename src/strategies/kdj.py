@@ -13,8 +13,8 @@ class KDJStrategy(Strategy):
     def __init__(
         self,
         symbol: str,
-        sma_window: int = 20,
-        atr_window: int = 14,
+        sma_window: int = 60,
+        atr_window: int = 9,
         stop_mult: float = 2.0,
     ) -> None:
         self.symbol = symbol
@@ -42,6 +42,7 @@ class KDJStrategy(Strategy):
             return
         close = row["Close"]
         sma = self.history["Close"].rolling(self.sma_window).mean().iloc[-1]
+        sma60 = self.history["Close"].rolling(20).mean().iloc[-1]
 
         high = self.history["High"]
         low = self.history["Low"]
@@ -54,12 +55,15 @@ class KDJStrategy(Strategy):
 
         if self.prev_k is not None and self.prev_d is not None:
             if (
-                self.prev_k < self.prev_d
-                and k > d
+                # self.prev_k < self.prev_d
+                # and k > d
+                # and j < 20
+                close > sma60
+                and sma60 > sma
                 and j < 20
                 and not self.in_position
             ):
-                engine.buy(self.symbol, 1)
+                engine.buy(self.symbol, 50)
                 self.in_position = True
                 self.entry_price = float(close)
             elif self.in_position:
@@ -69,7 +73,7 @@ class KDJStrategy(Strategy):
                     else None
                 )
                 if close < sma or (stop is not None and close <= stop):
-                    engine.sell(self.symbol, 1)
+                    engine.sell(self.symbol, 50)
                     self.in_position = False
                     self.entry_price = None
         self.prev_k = k

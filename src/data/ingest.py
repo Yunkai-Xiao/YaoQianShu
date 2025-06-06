@@ -25,11 +25,12 @@ def download_history(
     start: str | pd.Timestamp = "2000-01-01",
     end: Optional[str | pd.Timestamp] = None,
     store: Optional[DataStore] = None,
+    interval: str = "1h",
 ) -> pd.DataFrame:
     """Download daily OHLCV via Yahoo Finance and optionally save to DataStore."""
     if yf is None:
         raise ImportError("pip install yfinance to enable download_history")
-    df = yf.download(symbol, start=start, end=end, progress=False)
+    df = yf.download(symbol, start=start, end=end, progress=False, interval=interval)
     if df.empty:
         raise ValueError(f"No data returned for {symbol}")
     df.index = pd.to_datetime(df.index)
