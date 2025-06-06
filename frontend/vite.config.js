@@ -10,6 +10,8 @@ export default defineConfig({
       '/indicator': 'http://localhost:8000',
       '/backtest': 'http://localhost:8000',
       '/strategies': 'http://localhost:8000',
+      '/symbols': 'http://localhost:8000',
+      '/fetch': 'http://localhost:8000',
     },
   },
 })
