@@ -18,7 +18,7 @@ from .strategy import Strategy
 import importlib
 import inspect
 import pkgutil
-from .indicators import sma, ema, macd, volume, kdj
+from .indicators import sma, ema, macd, volume, kdj, atr
 
 
 app = FastAPI(title="Backtest API")
@@ -39,6 +39,7 @@ _INDICATORS: Dict[str, Callable[..., Any]] = {
     "macd": macd,
     "volume": volume,
     "kdj": kdj,
+    "atr": atr,
 }
 
 _STRATEGIES: Dict[str, Callable[..., Any]] = {}
