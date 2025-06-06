@@ -18,7 +18,7 @@ from .strategy import Strategy
 import importlib
 import inspect
 import pkgutil
-from .indicators import sma, ema, macd, volume
+from .indicators import sma, ema, macd, volume, kdj, atr
 
 
 app = FastAPI(title="Backtest API")
@@ -38,6 +38,8 @@ _INDICATORS: Dict[str, Callable[..., Any]] = {
     "ema": ema,
     "macd": macd,
     "volume": volume,
+    "kdj": kdj,
+    "atr": atr,
 }
 
 _STRATEGIES: Dict[str, Callable[..., Any]] = {}
@@ -53,6 +55,7 @@ def refresh_strategies() -> None:
         for name, obj in inspect.getmembers(mod, inspect.isclass):
             if issubclass(obj, Strategy) and obj is not Strategy:
                 _STRATEGIES[obj.__name__] = obj
+
 
 # Populate on start
 refresh_strategies()
@@ -142,6 +145,7 @@ def run_backtest(req: BacktestRequest):
 def list_strategies():
     refresh_strategies()
     return {"strategies": list(_STRATEGIES.keys())}
+
 
 @app.get("/symbols")
 def list_symbols():

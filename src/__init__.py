@@ -6,6 +6,7 @@ from .strategies import (
     MACDStrategy,
     FriendStrategy,
     SupportFTStrategy,
+    KDJStrategy,
 )
 from .analysis import analyze
 
@@ -20,5 +21,6 @@ __all__ = [
     "MACDStrategy",
     "FriendStrategy",
     "SupportFTStrategy",
+    "KDJStrategy",
     "analyze",
 ]
