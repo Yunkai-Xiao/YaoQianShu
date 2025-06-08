@@ -36,6 +36,8 @@ export default function App() {
   const [fetchSym, setFetchSym] = useState('');
   const [fetchStart, setFetchStart] = useState('2000-01-01');
   const [fetchEnd, setFetchEnd] = useState('');
+  const [availSel, setAvailSel] = useState([]);
+  const [chosenSel, setChosenSel] = useState([]);
 
   // Load symbols and strategies on mount
   useEffect(() => {
@@ -84,6 +86,16 @@ export default function App() {
     // reload symbol list
     const syms = await fetch('/symbols').then((r) => r.json());
     setSymbols(syms.symbols);
+  };
+
+  const addSelected = () => {
+    setSelectedSyms([...selectedSyms, ...availSel]);
+    setAvailSel([]);
+  };
+
+  const removeSelected = () => {
+    setSelectedSyms(selectedSyms.filter((s) => !chosenSel.includes(s)));
+    setChosenSel([]);
   };
 
   const priceData = {
@@ -153,19 +165,42 @@ export default function App() {
       {tab === 'backtest' && (
         <div>
           <div className="controls">
-            <select
-              multiple
-              value={selectedSyms}
-              onChange={(e) =>
-                setSelectedSyms(Array.from(e.target.selectedOptions, (o) => o.value))
-              }
-            >
-              {symbols.map((s) => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
+            <div className="symbol-select">
+              <select
+                multiple
+                size={5}
+                value={availSel}
+                onChange={(e) =>
+                  setAvailSel(Array.from(e.target.selectedOptions, (o) => o.value))
+                }
+              >
+                {symbols
+                  .filter((s) => !selectedSyms.includes(s))
+                  .map((s) => (
+                    <option key={s} value={s}>
+                      {s}
+                    </option>
+                  ))}
+              </select>
+              <div className="symbol-buttons">
+                <button onClick={addSelected}>&gt;</button>
+                <button onClick={removeSelected}>&lt;</button>
+              </div>
+              <select
+                multiple
+                size={5}
+                value={chosenSel}
+                onChange={(e) =>
+                  setChosenSel(Array.from(e.target.selectedOptions, (o) => o.value))
+                }
+              >
+                {selectedSyms.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
             <select value={strategy} onChange={(e) => setStrategy(e.target.value)}>
               {strategies.map((s) => (
                 <option key={s} value={s}>

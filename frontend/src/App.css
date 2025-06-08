@@ -31,6 +31,22 @@
   margin-top: 1rem;
 }
 
+.symbol-select {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.symbol-select select {
+  min-width: 120px;
+}
+
+.symbol-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
 .report {
   text-align: left;
   background: #f5f5f5;
