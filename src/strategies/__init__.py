@@ -6,6 +6,7 @@ from .friend_strategy import FriendStrategy
 from .support_ft_strategy import SupportFTStrategy
 from .kdj import KDJStrategy
 from .alpha101 import Alpha101Strategy
+from .alpha_weight import AlphaWeightStrategy
 
 __all__ = [
     "MovingAverageCrossStrategy",
@@ -14,4 +15,5 @@ __all__ = [
     "SupportFTStrategy",
     "KDJStrategy",
     "Alpha101Strategy",
+    "AlphaWeightStrategy",
 ]
