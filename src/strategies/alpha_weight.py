@@ -48,16 +48,24 @@ class AlphaWeightStrategy(Strategy):
             return
         weights = {sym: ranks[sym] / total for sym in scores}
 
+        # Determine position changes first, then execute sells before buys
+        changes: List[tuple[str, int]] = []
         for sym, weight in weights.items():
             price = data[sym]["Close"]
             portfolio_value = engine.portfolio.value(data)
             target_qty = int((portfolio_value * weight) / price)
             owned = engine.portfolio.positions.get(sym, 0)
             diff = target_qty - owned
+            if diff:
+                changes.append((sym, diff))
+
+        for sym, diff in changes:
+            if diff < 0:
+                engine.sell(sym, -diff)
+
+        for sym, diff in changes:
             if diff > 0:
                 engine.buy(sym, diff)
-            elif diff < 0:
-                engine.sell(sym, -diff)
 
 
 __all__ = ["AlphaWeightStrategy"]
