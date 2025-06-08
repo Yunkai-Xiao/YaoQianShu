@@ -48,9 +48,9 @@ class AlphaWeightStrategy(Strategy):
             return
         weights = {sym: ranks[sym] / total for sym in scores}
 
-        portfolio_value = engine.portfolio.value(data)
         for sym, weight in weights.items():
             price = data[sym]["Close"]
+            portfolio_value = engine.portfolio.value(data)
             target_qty = int((portfolio_value * weight) / price)
             owned = engine.portfolio.positions.get(sym, 0)
             diff = target_qty - owned
