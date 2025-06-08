@@ -14,6 +14,7 @@ from .strategies import (
     SupportFTStrategy,
     KDJStrategy,
     Alpha101Strategy,
+    AlphaWeightStrategy,
 )
 from .analysis import analyze
 
@@ -31,5 +32,6 @@ __all__ = [
     "SupportFTStrategy",
     "KDJStrategy",
     "Alpha101Strategy",
+    "AlphaWeightStrategy",
     "analyze",
 ]

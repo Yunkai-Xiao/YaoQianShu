@@ -139,8 +139,9 @@ npm run dev
 The React app communicates with the FastAPI service (running on
 `localhost:8000`) and provides two tabs:
 
-1. **Backtest** – select a symbol and strategy, run a backtest and view price
-   data, trade markers, portfolio equity and a small table of performance
-   metrics.
+1. **Backtest** – select one or more symbols and a strategy, run a backtest and
+   view price data, trade markers, portfolio equity and a small table of
+   performance metrics. Hold Ctrl/Cmd to pick multiple symbols for portfolio
+   strategies such as ``AlphaWeightStrategy``.
 2. **Fetch Data** – download new symbols via Yahoo Finance and add them to the
    local datastore.

@@ -26,7 +26,7 @@ ChartJS.register(
 export default function App() {
   const [tab, setTab] = useState('backtest');
   const [symbols, setSymbols] = useState([]);
-  const [symbol, setSymbol] = useState('');
+  const [selectedSyms, setSelectedSyms] = useState([]);
   const [strategies, setStrategies] = useState([]);
   const [strategy, setStrategy] = useState('');
   const [prices, setPrices] = useState([]);
@@ -43,7 +43,7 @@ export default function App() {
       .then((r) => r.json())
       .then((d) => {
         setSymbols(d.symbols);
-        if (d.symbols.length) setSymbol(d.symbols[0]);
+        if (d.symbols.length) setSelectedSyms([d.symbols[0]]);
       });
     fetch('/strategies')
       .then((r) => r.json())
@@ -53,19 +53,19 @@ export default function App() {
       });
   }, []);
 
-  // Load price data whenever symbol changes
+  // Load price data whenever selectedSyms change (use first symbol)
   useEffect(() => {
-    if (!symbol) return;
-    fetch(`/data/${symbol}`)
+    if (!selectedSyms.length) return;
+    fetch(`/data/${selectedSyms[0]}`)
       .then((r) => r.json())
       .then((d) => setPrices(d.data));
-  }, [symbol]);
+  }, [selectedSyms]);
 
   const runBacktest = async () => {
     const res = await fetch('/backtest', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ symbol, strategy }),
+      body: JSON.stringify({ symbols: selectedSyms, strategy }),
     });
     const data = await res.json();
     setHistory(data.history);
@@ -153,7 +153,13 @@ export default function App() {
       {tab === 'backtest' && (
         <div>
           <div className="controls">
-            <select value={symbol} onChange={(e) => setSymbol(e.target.value)}>
+            <select
+              multiple
+              value={selectedSyms}
+              onChange={(e) =>
+                setSelectedSyms(Array.from(e.target.selectedOptions, (o) => o.value))
+              }
+            >
               {symbols.map((s) => (
                 <option key={s} value={s}>
                   {s}

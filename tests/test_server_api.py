@@ -39,3 +39,23 @@ def test_symbols_endpoint(tmp_path, monkeypatch):
     resp = client.get("/symbols")
     assert resp.status_code == 200
     assert resp.json() == {"symbols": ["AAA", "BBB"]}
+
+
+def test_backtest_multiple_symbols(tmp_path, monkeypatch):
+    _write_sample_csv(tmp_path, "AAA", [1, 2, 3])
+    _write_sample_csv(tmp_path, "BBB", [1, 1, 1])
+
+    ds = DataStore(tmp_path)
+    monkeypatch.setattr(server, "store", ds)
+    monkeypatch.setattr(server, "DATA_ROOT", Path(tmp_path))
+    server._PORTALS.clear()
+    server.refresh_strategies()
+
+    client = TestClient(server.app)
+    resp = client.post(
+        "/backtest",
+        json={"symbols": ["AAA", "BBB"], "strategy": "AlphaWeightStrategy"},
+    )
+    assert resp.status_code == 200
+    data = resp.json()
+    assert len(data["history"]) == 3
