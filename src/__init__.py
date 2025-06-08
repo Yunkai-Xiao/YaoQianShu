@@ -1,4 +1,10 @@
-from .data import DataStore, DataPortal, DataSeries, download_history
+from .data import (
+    DataStore,
+    DataPortal,
+    DataSeries,
+    download_history,
+    download_fundamentals,
+)
 from .engine import Engine
 from .strategy import Strategy
 from .strategies import (
@@ -7,6 +13,7 @@ from .strategies import (
     FriendStrategy,
     SupportFTStrategy,
     KDJStrategy,
+    Alpha101Strategy,
 )
 from .analysis import analyze
 
@@ -15,6 +22,7 @@ __all__ = [
     "DataPortal",
     "DataSeries",
     "download_history",
+    "download_fundamentals",
     "Engine",
     "Strategy",
     "MovingAverageCrossStrategy",
@@ -22,5 +30,6 @@ __all__ = [
     "FriendStrategy",
     "SupportFTStrategy",
     "KDJStrategy",
+    "Alpha101Strategy",
     "analyze",
 ]
