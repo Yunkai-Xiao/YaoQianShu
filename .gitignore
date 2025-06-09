@@ -1,3 +1,6 @@
 src/market_data/*
 market_data/*
 */__pycache__/*
+*/*/__pycache__/*.pyc
+package-lock.json
+Miniconda3-latest-Linux-x86_64.sh
