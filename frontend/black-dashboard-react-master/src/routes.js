@@ -23,6 +23,7 @@ import Rtl from "views/Rtl.js";
 import TableList from "views/TableList.js";
 import Typography from "views/Typography.js";
 import UserProfile from "views/UserProfile.js";
+import Backtest from "views/Backtest.js";
 
 var routes = [
   {
@@ -31,6 +32,14 @@ var routes = [
     rtlName: "لوحة القيادة",
     icon: "tim-icons icon-chart-pie-36",
     component: <Dashboard />,
+    layout: "/admin",
+  },
+  {
+    path: "/backtest",
+    name: "Backtest",
+    rtlName: "باك تست",
+    icon: "tim-icons icon-laptop",
+    component: <Backtest />,
     layout: "/admin",
   },
   {

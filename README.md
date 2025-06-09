@@ -127,13 +127,12 @@ The response contains the trade history along with a performance report.
 
 ## Frontend UI
 
-A small React interface is included under `frontend/`. Install its dependencies and
-start the dev server:
+A small React interface is located under `frontend/black-dashboard-react-master`.
+Install its dependencies (they are already checked in) and start the dev server:
 
 ```bash
-cd frontend
-npm install
-npm run dev
+cd frontend/black-dashboard-react-master
+npm start
 ```
 
 The React app communicates with the FastAPI service (running on
