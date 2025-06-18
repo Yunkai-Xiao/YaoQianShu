@@ -7,6 +7,7 @@ from .support_ft_strategy import SupportFTStrategy
 from .kdj import KDJStrategy
 from .alpha101 import Alpha101Strategy
 from .alpha_weight import AlphaWeightStrategy
+from .pullback_strategy import PullbackStrategy
 
 __all__ = [
     "MovingAverageCrossStrategy",
@@ -16,4 +17,5 @@ __all__ = [
     "KDJStrategy",
     "Alpha101Strategy",
     "AlphaWeightStrategy",
+    "PullbackStrategy",
 ]
